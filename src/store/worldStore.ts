@@ -113,7 +113,7 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
   selectedEntityType: null,
   settings: defaultSettings,
   isDirty: false,
-  isSimulating: true,
+  isSimulating: false,
   chaosEventType: 'raid',
   sidePanel: 'inspect',
 
@@ -158,16 +158,6 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
 
     let armies = world.armies.map(army => {
       if (!army.destination || army.path.length === 0) {
-        if (army.state === 'patrolling') {
-          // Drift patrol armies slightly
-          return {
-            ...army,
-            position: {
-              x: army.position.x + (Math.sin(Date.now() / 3000) * 0.3),
-              y: army.position.y + (Math.cos(Date.now() / 4000) * 0.2),
-            }
-          }
-        }
         return army
       }
 
