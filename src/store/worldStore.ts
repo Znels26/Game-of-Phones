@@ -14,6 +14,9 @@ interface WorldStore {
   toolMode: ToolMode
   selectedTerrainType: string
   selectedFactionId: string | null
+  selectedSettlementType: string
+  brushSize: number
+  brushOpacity: number
   selectedEntityId: string | null
   selectedEntityType: 'settlement' | 'army' | 'region' | 'faction' | null
   settings: AppSettings
@@ -36,6 +39,9 @@ interface WorldStore {
   setToolMode: (mode: ToolMode) => void
   setSelectedTerrain: (terrain: string) => void
   setSelectedFaction: (id: string | null) => void
+  setSelectedSettlementType: (type: string) => void
+  setBrushSize: (size: number) => void
+  setBrushOpacity: (opacity: number) => void
   selectEntity: (id: string | null, type: WorldStore['selectedEntityType']) => void
   setSidePanel: (panel: WorldStore['sidePanel']) => void
   setChaosEventType: (type: EventType) => void
@@ -113,6 +119,9 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
   toolMode: 'select',
   selectedTerrainType: 'plains',
   selectedFactionId: null,
+  selectedSettlementType: 'town',
+  brushSize: 40,
+  brushOpacity: 1.0,
   selectedEntityId: null,
   selectedEntityType: null,
   settings: defaultSettings,
@@ -151,6 +160,9 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
   setToolMode: (mode) => set({ toolMode: mode }),
   setSelectedTerrain: (terrain) => set({ selectedTerrainType: terrain }),
   setSelectedFaction: (id) => set({ selectedFactionId: id }),
+  setSelectedSettlementType: (type) => set({ selectedSettlementType: type }),
+  setBrushSize: (size) => set({ brushSize: size }),
+  setBrushOpacity: (opacity) => set({ brushOpacity: opacity }),
   selectEntity: (id, type) => set({ selectedEntityId: id, selectedEntityType: type }),
   setSidePanel: (panel) => set({ sidePanel: panel }),
   setChaosEventType: (type) => set({ chaosEventType: type }),

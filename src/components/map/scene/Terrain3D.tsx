@@ -41,6 +41,7 @@ export default function Terrain3D() {
   const gridHeight = useWorldStore(s => s.world.gridHeight)
   const toolMode = useWorldStore(s => s.toolMode)
   const selectedTerrainType = useWorldStore(s => s.selectedTerrainType)
+  const brushSize = useWorldStore(s => s.brushSize)
   const paintTerrain = useWorldStore(s => s.paintTerrain)
   const modifyHeight = useWorldStore(s => s.modifyHeight)
   const isPainting = useRef(false)
@@ -85,9 +86,9 @@ export default function Terrain3D() {
     isPainting.current = true
     e.stopPropagation()
     const { x, z } = e.point
-    if (toolMode === 'paint_terrain') paintTerrain(x, z, selectedTerrainType as TerrainType, 40)
-    else if (toolMode === 'raise_terrain') modifyHeight(x, z, 0.4, 40)
-    else if (toolMode === 'lower_terrain') modifyHeight(x, z, -0.4, 40)
+    if (toolMode === 'paint_terrain') paintTerrain(x, z, selectedTerrainType as TerrainType, brushSize)
+    else if (toolMode === 'raise_terrain') modifyHeight(x, z, 0.4, brushSize)
+    else if (toolMode === 'lower_terrain') modifyHeight(x, z, -0.4, brushSize)
   }
 
   if (!geometry) return null

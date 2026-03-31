@@ -55,6 +55,7 @@ function ClickToPlane() {
   const factions = useWorldStore(s => s.world.factions)
   const gridWidth = useWorldStore(s => s.world.gridWidth)
   const gridHeight = useWorldStore(s => s.world.gridHeight)
+  const selectedSettlementType = useWorldStore(s => s.selectedSettlementType)
   const placeSettlement = useWorldStore(s => s.placeSettlement)
   const spawnArmy = useWorldStore(s => s.spawnArmy)
 
@@ -63,7 +64,7 @@ function ClickToPlane() {
     e.stopPropagation()
     const wx = e.point.x, wz = e.point.z
     const factionId = selectedFactionId ?? factions[0]?.id ?? null
-    if (toolMode === 'place_settlement') placeSettlement({ x: wx, y: wz }, 'town', factionId)
+    if (toolMode === 'place_settlement') placeSettlement({ x: wx, y: wz }, selectedSettlementType as any, factionId)
     else if (toolMode === 'place_army' && factionId) spawnArmy({ x: wx, y: wz }, factionId)
   }
 

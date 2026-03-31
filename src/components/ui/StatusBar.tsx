@@ -1,45 +1,57 @@
 'use client'
 import { useWorldStore } from '@/store/worldStore'
 
+const TOOL_HINTS: Record<string, string> = {
+  select:           '↖  Select — click a settlement or army',
+  inspect:          '◎  Inspect mode',
+  paint_terrain:    '◉  Paint biome — drag to paint',
+  raise_terrain:    '▲  Raise terrain — drag to sculpt',
+  lower_terrain:    '▼  Lower terrain — drag to erode',
+  erase:            '◌  Smooth terrain — drag to flatten',
+  place_settlement: '⬟  Place settlement — click map',
+  place_army:       '⚑  Spawn army — click map',
+  draw_road:        '═  Draw road — click waypoints, double-click to finish',
+  draw_river:       '〜 Draw river — click waypoints, double-click to finish',
+  draw_region:      '⬡  Define region — click to outline territory',
+  chaos:            '⚡  Chaos event — click map to trigger',
+}
+
 export default function StatusBar() {
-  const { world, camera, isSimulating, toolMode } = useWorldStore()
-
-  const tod = world.timeOfDay
-  const hour = Math.floor(tod * 24)
-  const period = hour < 6 ? 'Night' : hour < 12 ? 'Dawn' : hour < 18 ? 'Day' : 'Dusk'
-  const timeStr = `${hour.toString().padStart(2, '0')}:00 — ${period}`
-
-  const toolLabels: Record<string, string> = {
-    select: 'Select Mode',
-    chaos: '⚡ Chaos Active — Click map to strike',
-    paint_terrain: 'Terrain Painter',
-    place_settlement: 'Place Settlement — Click map',
-    place_army: 'Spawn Army — Click map',
-    draw_road: 'Draw Road',
-    draw_river: 'Draw River',
-    draw_region: 'Define Region',
-    erase: 'Erase Mode',
-    inspect: 'Inspect Mode',
-    lore: 'Lore Mode',
-  }
+  const { world, toolMode, brushSize } = useWorldStore()
+  const isBrushTool = ['raise_terrain', 'lower_terrain', 'paint_terrain', 'erase'].includes(toolMode)
 
   return (
-    <div className="h-6 bg-realm-bg border-t border-realm-border flex items-center px-4 gap-6 flex-shrink-0 z-50">
-      <span className="text-xs font-ui text-realm-stone/50">
-        {toolLabels[toolMode] ?? toolMode}
+    <div
+      className="flex items-center px-4 gap-5 flex-shrink-0"
+      style={{ height: 30, background: '#07080c', borderTop: '1px solid rgba(255,255,255,0.04)', zIndex: 50 }}
+    >
+      {/* Tool hint */}
+      <span style={{ fontSize: 11, fontFamily: 'var(--font-rajdhani)', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.02em' }}>
+        {TOOL_HINTS[toolMode] ?? toolMode}
       </span>
-      <div className="flex-1" />
-      <span className="text-xs font-ui text-realm-stone/40">
-        Zoom {Math.round(camera.zoom * 100)}%
+
+      {isBrushTool && (
+        <>
+          <div style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.08)' }} />
+          <span style={{ fontSize: 11, fontFamily: 'var(--font-rajdhani)', color: 'rgba(255,255,255,0.25)' }}>
+            Brush: <span style={{ color: '#c9a84c' }}>{brushSize}px</span>
+          </span>
+        </>
+      )}
+
+      <div style={{ flex: 1 }} />
+
+      {/* World stats */}
+      <span style={{ fontSize: 11, fontFamily: 'var(--font-rajdhani)', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.03em' }}>
+        {world.settlements.length} settlements
       </span>
-      <span className="text-xs font-ui text-realm-stone/40">
-        {timeStr}
+      <div style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.06)' }} />
+      <span style={{ fontSize: 11, fontFamily: 'var(--font-rajdhani)', color: 'rgba(255,255,255,0.2)' }}>
+        {world.factions.length} factions
       </span>
-      <span className={`text-xs font-ui ${isSimulating ? 'text-realm-gold/60' : 'text-realm-stone/30'}`}>
-        {isSimulating ? '▶ Simulating' : '⏸ Paused'}
-      </span>
-      <span className="text-xs font-ui text-realm-stone/40">
-        {world.settlements.length} settlements · {world.armies.length} armies · {world.activeEvents.length} events
+      <div style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.06)' }} />
+      <span style={{ fontSize: 11, fontFamily: 'var(--font-rajdhani)', color: 'rgba(201,168,76,0.4)', letterSpacing: '0.04em' }}>
+        {world.lore.worldName}
       </span>
     </div>
   )
