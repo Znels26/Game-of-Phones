@@ -2,16 +2,19 @@
 import { useWorldStore } from '@/store/worldStore'
 import type { ToolMode } from '@/types/world'
 
-const TOOLS: { mode: ToolMode; icon: string; label: string }[] = [
-  { mode: 'select', icon: '↖', label: 'Select (S)' },
-  { mode: 'inspect', icon: '◎', label: 'Inspect (I)' },
-  { mode: 'chaos', icon: '⚡', label: 'Chaos (C)' },
-  { mode: 'place_settlement', icon: '⬟', label: 'Settlement (T)' },
-  { mode: 'place_army', icon: '⚑', label: 'Army (A)' },
-  { mode: 'draw_road', icon: '—', label: 'Road' },
-  { mode: 'draw_river', icon: '〜', label: 'River' },
-  { mode: 'paint_terrain', icon: '🗺', label: 'Terrain (P)' },
-  { mode: 'erase', icon: '✕', label: 'Erase' },
+const TOOLS: { mode: ToolMode; icon: string; label: string; group?: string }[] = [
+  { mode: 'select',          icon: '↖',  label: 'Select',           group: 'nav' },
+  { mode: 'inspect',         icon: '◎',  label: 'Inspect',          group: 'nav' },
+  { mode: 'place_settlement',icon: '⬟',  label: 'Place Settlement', group: 'place' },
+  { mode: 'place_army',      icon: '⚑',  label: 'Place Army',       group: 'place' },
+  { mode: 'draw_road',       icon: '—',  label: 'Draw Road',        group: 'draw' },
+  { mode: 'draw_river',      icon: '〜', label: 'Draw River',       group: 'draw' },
+  { mode: 'draw_region',     icon: '▭',  label: 'Draw Border',      group: 'draw' },
+  { mode: 'raise_terrain',   icon: '▲',  label: 'Raise Terrain',    group: 'terrain' },
+  { mode: 'lower_terrain',   icon: '▼',  label: 'Lower / Water',    group: 'terrain' },
+  { mode: 'paint_terrain',   icon: '🖌', label: 'Paint Terrain',    group: 'terrain' },
+  { mode: 'erase',           icon: '✕',  label: 'Erase',            group: 'terrain' },
+  { mode: 'chaos',           icon: '⚡', label: 'Chaos Event',      group: 'chaos' },
 ]
 
 export default function FloatingToolbar() {
@@ -48,24 +51,15 @@ export default function FloatingToolbar() {
 
         <div className="w-full h-px bg-realm-border my-1" />
 
-        {/* Camera controls */}
-        {[
-          { icon: '+', action: () => useWorldStore.getState().zoomCamera(0.2, 0, 0), label: 'Zoom in' },
-          { icon: '−', action: () => useWorldStore.getState().zoomCamera(-0.2, 0, 0), label: 'Zoom out' },
-          { icon: '⌂', action: () => useWorldStore.getState().setCamera({ x: -100, y: -50, zoom: 1.2, followArmyId: null }), label: 'Reset camera' },
-        ].map(btn => (
-          <button
-            key={btn.icon}
-            onClick={btn.action}
-            title={btn.label}
-            className="w-9 h-9 flex items-center justify-center rounded text-sm text-realm-stone hover:text-realm-parchment hover:bg-realm-surface transition-all font-ui relative group"
-          >
-            {btn.icon}
-            <span className="absolute left-full ml-2 px-2 py-1 bg-realm-bg border border-realm-border rounded text-xs text-realm-parchment whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-              {btn.label}
-            </span>
-          </button>
-        ))}
+        {/* Save shortcut */}
+        <button
+          onClick={() => useWorldStore.getState().save()}
+          title="Save world"
+          className="w-9 h-9 flex items-center justify-center rounded text-sm text-realm-stone hover:text-realm-gold hover:bg-realm-surface transition-all relative group"
+        >
+          💾
+          <span className="absolute left-full ml-2 px-2 py-1 bg-realm-bg border border-realm-border rounded text-xs text-realm-parchment whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">Save World</span>
+        </button>
       </div>
     </div>
   )

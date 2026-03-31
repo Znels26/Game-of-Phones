@@ -1,5 +1,37 @@
 import { v4 as uuid } from 'uuid'
-import type { WorldState, Faction, Settlement, Army, Road, River, Region } from '@/types/world'
+import type { WorldState, Faction, Settlement, Army, Road, River, Region, TerrainCell, TerrainType } from '@/types/world'
+
+const MAP_RES = 64
+
+function generateTerrain(): TerrainCell[][] {
+  const rows = MAP_RES, cols = MAP_RES
+  const map: TerrainCell[][] = []
+  for (let r = 0; r < rows; r++) {
+    map[r] = []
+    for (let c = 0; c < cols; c++) {
+      const nx = c / cols - 0.5, ny = r / rows - 0.5
+      let h = 0
+      h += Math.sin(nx * 7.1 + 1.2) * Math.cos(ny * 5.8) * 2.2
+      h += Math.sin(nx * 14.3 - 0.5) * Math.sin(ny * 11.7 + 2.1) * 1.1
+      h += Math.sin(nx * 27.8 + 3.0) * Math.cos(ny * 21.4 - 1.3) * 0.45
+      h += Math.cos(nx * 4.2 + ny * 5.8) * 1.4
+      const dist = Math.sqrt(nx * nx * 1.1 + ny * ny * 0.9) * 2.0
+      h -= dist * dist * 2.8
+      h = Math.max(0, Math.min(10, (h + 3.2) * 1.1))
+      let type: TerrainType
+      if (h < 1.4) type = 'ocean'
+      else if (h < 2.0) type = 'beach'
+      else if (h < 3.8) type = 'plains'
+      else if (h < 5.5) type = 'hills'
+      else if (h < 7.5) type = 'mountains'
+      else type = 'peaks'
+      if (type === 'plains' && Math.sin(nx * 31.2 + ny * 29.7) > 0.35) type = 'forest'
+      if (type === 'plains' && Math.cos(nx * 23.1 - ny * 18.4) > 0.55) type = 'forest'
+      map[r].push({ type, elevation: h, moisture: 0.5 })
+    }
+  }
+  return map
+}
 
 const FACTIONS: Faction[] = [
   {
@@ -293,7 +325,7 @@ export function createDefaultWorld(): WorldState {
       { type: 'storm', position: { x: 520, y: 200 }, radius: 120, intensity: 0.8, velocity: { x: -0.5, y: 0.3 } },
       { type: 'fog', position: { x: 180, y: 330 }, radius: 100, intensity: 0.5, velocity: { x: 0.2, y: 0.1 } },
     ],
-    terrain: [],
+    terrain: generateTerrain(),
     gridWidth: 800,
     gridHeight: 600,
     timeOfDay: 0.3,

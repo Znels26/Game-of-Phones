@@ -67,6 +67,10 @@ interface WorldStore {
   // Settings
   updateSettings: (updates: Partial<AppSettings>) => void
 
+  // Terrain editing
+  paintTerrain: (worldX: number, worldZ: number, terrainType: import('@/types/world').TerrainType, brushRadius: number) => void
+  modifyHeight: (worldX: number, worldZ: number, delta: number, brushRadius: number) => void
+
   // Persistence
   save: () => void
   load: () => void
@@ -374,6 +378,46 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
 
   updateSettings: (updates) => {
     set(s => ({ settings: { ...s.settings, ...updates } }))
+  },
+
+  paintTerrain: (worldX, worldZ, terrainType, brushRadius) => {
+    const { world } = get()
+    if (!world.terrain.length) return
+    const rows = world.terrain.length, cols = world.terrain[0].length
+    const col = (worldX / world.gridWidth) * cols
+    const row = (worldZ / world.gridHeight) * rows
+    const cellRadius = (brushRadius / world.gridWidth) * cols
+    const newTerrain = world.terrain.map((r, ri) =>
+      r.map((cell, ci) => {
+        const dist = Math.sqrt((ci - col) ** 2 + (ri - row) ** 2)
+        if (dist > cellRadius) return cell
+        return { ...cell, type: terrainType }
+      })
+    )
+    set(s => ({ world: { ...s.world, terrain: newTerrain }, isDirty: true }))
+  },
+
+  modifyHeight: (worldX, worldZ, delta, brushRadius) => {
+    const { world } = get()
+    if (!world.terrain.length) return
+    const rows = world.terrain.length, cols = world.terrain[0].length
+    const col = (worldX / world.gridWidth) * cols
+    const row = (worldZ / world.gridHeight) * rows
+    const cellRadius = (brushRadius / world.gridWidth) * cols
+    const newTerrain = world.terrain.map((r, ri) =>
+      r.map((cell, ci) => {
+        const dist = Math.sqrt((ci - col) ** 2 + (ri - row) ** 2)
+        if (dist > cellRadius) return cell
+        const falloff = 1 - dist / cellRadius
+        const newH = Math.max(0, Math.min(10, cell.elevation + delta * falloff))
+        let type = cell.type
+        if (newH < 1.4) type = 'ocean'
+        else if (newH < 2.0) type = 'beach'
+        else if (cell.type === 'ocean' || cell.type === 'beach') type = 'plains'
+        return { ...cell, elevation: newH, type }
+      })
+    )
+    set(s => ({ world: { ...s.world, terrain: newTerrain }, isDirty: true }))
   },
 
   save: () => {

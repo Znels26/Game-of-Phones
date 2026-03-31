@@ -174,7 +174,8 @@ export interface CameraState {
 }
 
 export type ToolMode =
-  | 'select' | 'paint_terrain' | 'place_settlement' | 'place_army'
+  | 'select' | 'paint_terrain' | 'raise_terrain' | 'lower_terrain'
+  | 'place_settlement' | 'place_army'
   | 'draw_road' | 'draw_river' | 'draw_region' | 'erase'
   | 'chaos' | 'lore' | 'inspect'
 
