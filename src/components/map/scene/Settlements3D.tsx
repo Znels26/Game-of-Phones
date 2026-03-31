@@ -167,8 +167,8 @@ function CapitalModel({ color }: { color: string }) {
       {/* Cathedral/throne spires */}
       {([ [0,22],[3.5,18],[-3.5,18] ] as [number,number][]).map(([r,h],i) => (
         <group key={i} position={[r === 0 ? 0 : r, 0, r === 0 ? 0 : 0]}>
-          <mesh position={[0, h*s, 0]} castShadow>
-            <coneGeometry args={[1.8*s, 7*s, 4]} rotation={[0, Math.PI/4, 0]} />
+          <mesh position={[0, h*s, 0]} rotation={[0, Math.PI/4, 0]} castShadow>
+            <coneGeometry args={[1.8*s, 7*s, 4]} />
             {MAT(dark)}
           </mesh>
         </group>
