@@ -1,7 +1,7 @@
 'use client'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Html } from '@react-three/drei'
+import { Html, Line } from '@react-three/drei'
 import { useWorldStore } from '@/store/worldStore'
 import { getTerrainHeight } from './Terrain3D'
 
@@ -30,9 +30,9 @@ function Region3D({ region }: { region: any }) {
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3))
     geo.setIndex(indices)
 
-    // Border line strip
-    const border = pts.map(p => new THREE.Vector3(p.x, REGION_HEIGHT + 0.5, p.y))
-    border.push(border[0].clone()) // close loop
+    // Border line strip (closed loop)
+    const border = pts.map(p => [p.x, REGION_HEIGHT + 0.5, p.y] as [number, number, number])
+    border.push(border[0])
 
     return { fillGeo: geo, borderPoints: border, center: { x: cx, y: cy } }
   }, [region.polygon])
@@ -40,8 +40,6 @@ function Region3D({ region }: { region: any }) {
   const labelY = getTerrainHeight(terrain, center.x, center.y, gridWidth, gridHeight) + 45
 
   if (!fillGeo) return null
-
-  const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPoints)
 
   return (
     <group>
@@ -56,10 +54,8 @@ function Region3D({ region }: { region: any }) {
         />
       </mesh>
 
-      {/* Border line */}
-      <line geometry={borderGeo}>
-        <lineBasicMaterial color={region.color} transparent opacity={0.75} linewidth={2} />
-      </line>
+      {/* Border */}
+      <Line points={borderPoints} color={region.color} lineWidth={1.5} transparent opacity={0.8} />
 
       {/* Kingdom name label */}
       <Html
