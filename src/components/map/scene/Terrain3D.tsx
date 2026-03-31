@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { useWorldStore } from '@/store/worldStore'
 import type { TerrainType } from '@/types/world'
 
-const HEIGHT_SCALE = 18
+const HEIGHT_SCALE = 22
 
 const TERRAIN_RGB: Record<TerrainType, [number, number, number]> = {
   deep_ocean:   [0.04, 0.09, 0.22],
@@ -101,7 +101,7 @@ export default function Terrain3D() {
       onPointerUp={() => { isPainting.current = false }}
       onPointerLeave={() => { isPainting.current = false }}
     >
-      <meshLambertMaterial vertexColors side={THREE.DoubleSide} />
+      <meshStandardMaterial vertexColors side={THREE.DoubleSide} roughness={0.85} metalness={0.0} />
     </mesh>
   )
 }

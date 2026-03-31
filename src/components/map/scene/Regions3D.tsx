@@ -37,7 +37,7 @@ function Region3D({ region }: { region: any }) {
     return { fillGeo: geo, borderPoints: border, center: { x: cx, y: cy } }
   }, [region.polygon])
 
-  const labelY = getTerrainHeight(terrain, center.x, center.y, gridWidth, gridHeight) + 45
+  const labelY = getTerrainHeight(terrain, center.x, center.y, gridWidth, gridHeight) + 120
 
   if (!fillGeo) return null
 
@@ -60,11 +60,11 @@ function Region3D({ region }: { region: any }) {
       {/* Kingdom name label */}
       <Text
         position={[center.x, labelY, center.y]}
-        fontSize={11}
+        fontSize={18}
         color={region.color}
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.9}
+        outlineWidth={1.4}
         outlineColor="#000000"
         letterSpacing={0.12}
         material-depthWrite={false}

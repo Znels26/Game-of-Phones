@@ -12,6 +12,8 @@ function adjustColor(hex: string, amt: number) {
   return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
 }
 
+const MODEL_SCALE = 2.2
+
 // ── Shared material cache ────────────────────────────────────
 const MAT = (color: string, emit = 0) =>
   <meshPhongMaterial color={color} emissive={color} emissiveIntensity={emit} shininess={30} />
@@ -308,10 +310,10 @@ function Settlement({ settlement }: { settlement: any }) {
   )
 
   const modelHeights: Record<string,number> = {
-    capital:40, city:18, town:12, village:7, castle:22,
-    fortress:26, tower:16, ruin:5, port:12, dungeon:10, shrine:8, camp:5,
+    capital:88, city:40, town:26, village:16, castle:48,
+    fortress:57, tower:35, ruin:11, port:26, dungeon:22, shrine:18, camp:11,
   }
-  const labelH = terrainY + (modelHeights[t] ?? 12) + 10
+  const labelH = terrainY + (modelHeights[t] ?? 26) + 18
 
   const isCapital = t === 'capital'
   const isCastle  = t === 'castle' || t === 'fortress'
@@ -330,8 +332,15 @@ function Settlement({ settlement }: { settlement: any }) {
         </mesh>
       )}
 
+      {/* Always-visible glowing beacon at base */}
+      <mesh position={[0, 2, 0]}>
+        <sphereGeometry args={[isCapital ? 4 : isCastle ? 3 : 2.2, 10, 10]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2.0} toneMapped={false} />
+      </mesh>
+
       {/* Building model */}
       <group
+        scale={[MODEL_SCALE, MODEL_SCALE, MODEL_SCALE]}
         onClick={e => { e.stopPropagation(); selectEntity(settlement.id,'settlement'); setSidePanel('inspect') }}
       >
         {isCapital  && <CapitalModel color={color} />}
@@ -348,13 +357,14 @@ function Settlement({ settlement }: { settlement: any }) {
       {/* Name label — crisp SDF text */}
       <Text
         position={[0, labelH - terrainY, 0]}
-        fontSize={isCapital ? 15 : isCity||isCastle ? 11 : 8}
-        color={isCapital ? secColor : '#ede0c0'}
+        fontSize={isCapital ? 22 : isCity||isCastle ? 16 : 11}
+        color={isCapital ? secColor : '#f5e8c8'}
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.8}
+        outlineWidth={1.2}
         outlineColor="#000000"
-        letterSpacing={isCapital ? 0.1 : 0.04}
+        letterSpacing={isCapital ? 0.12 : 0.05}
+        material-depthWrite={false}
       >
         {settlement.name}
       </Text>

@@ -30,10 +30,11 @@ function SceneLighting() {
   const warmth = tod < 0.3 || tod > 0.7
   return (
     <>
-      <ambientLight intensity={isDay ? 0.55 : 0.15} color={isDay ? '#fffaf0' : '#1a2040'} />
+      <ambientLight intensity={isDay ? 0.7 : 0.18} color={isDay ? '#fff4e0' : '#1a2040'} />
+      <hemisphereLight args={[isDay ? '#c8e8ff' : '#0a0e20', '#2a1a08', isDay ? 0.5 : 0.1]} />
       <directionalLight
         position={[sunX, sunHeight * 500, -200]}
-        intensity={isDay ? 1.4 : 0.1}
+        intensity={isDay ? 1.8 : 0.12}
         color={warmth ? '#ffb060' : '#fff8e8'}
         castShadow
         shadow-mapSize-width={2048}
@@ -95,7 +96,7 @@ export default function WorldCanvas() {
         camera={{ fov: 45, near: 1, far: 4000, position: [cx - 80, 320, cz + 380] }}
       >
         <CameraSetup cx={cx} cz={cz} />
-        <fog attach="fog" args={[isNight ? '#0a0e1a' : '#c8d8e8', 800, 2800]} />
+        <fog attach="fog" args={[isNight ? '#0a0e1a' : '#c8dff0', 1000, 3200]} />
         <SceneLighting />
         <Suspense fallback={null}>
           <Terrain3D />
