@@ -1,9 +1,11 @@
 'use client'
 import { useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { useWorldStore } from '@/store/worldStore'
 import { useKeyboard } from '@/hooks/useKeyboard'
 import { useAutoSave } from '@/hooks/useAutoSave'
-import WorldCanvas from '@/components/map/WorldCanvas'
+
+const WorldCanvas = dynamic(() => import('@/components/map/WorldCanvas'), { ssr: false })
 import TopBar from '@/components/ui/TopBar'
 import StatusBar from '@/components/ui/StatusBar'
 import RightPanel from '@/components/ui/RightPanel'
