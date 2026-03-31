@@ -1,7 +1,7 @@
 'use client'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Html, Line } from '@react-three/drei'
+import { Text, Line } from '@react-three/drei'
 import { useWorldStore } from '@/store/worldStore'
 import { getTerrainHeight } from './Terrain3D'
 
@@ -58,27 +58,19 @@ function Region3D({ region }: { region: any }) {
       <Line points={borderPoints} color={region.color} lineWidth={1.5} transparent opacity={0.8} />
 
       {/* Kingdom name label */}
-      <Html
+      <Text
         position={[center.x, labelY, center.y]}
-        center
-        distanceFactor={400}
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-        zIndexRange={[10, 10]}
+        fontSize={11}
+        color={region.color}
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.9}
+        outlineColor="#000000"
+        letterSpacing={0.12}
+        material-depthWrite={false}
       >
-        <div style={{
-          fontFamily: '"Cinzel", serif',
-          fontWeight: 700,
-          fontSize: '13px',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: region.color,
-          textShadow: '0 0 6px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9), 1px 1px 0 rgba(0,0,0,0.8)',
-          whiteSpace: 'nowrap',
-          textAlign: 'center',
-        }}>
-          {region.name}
-        </div>
-      </Html>
+        {region.name.toUpperCase()}
+      </Text>
     </group>
   )
 }

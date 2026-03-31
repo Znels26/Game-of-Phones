@@ -95,6 +95,7 @@ export default function WorldCanvas() {
         camera={{ fov: 45, near: 1, far: 4000, position: [cx - 80, 320, cz + 380] }}
       >
         <CameraSetup cx={cx} cz={cz} />
+        <fog attach="fog" args={[isNight ? '#0a0e1a' : '#c8d8e8', 800, 2800]} />
         <SceneLighting />
         <Suspense fallback={null}>
           <Terrain3D />
