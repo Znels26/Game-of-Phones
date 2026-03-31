@@ -1,14 +1,18 @@
 'use client'
-import { useRef } from 'react'
 import * as THREE from 'three'
-import { useFrame } from '@react-three/fiber'
+import { Html } from '@react-three/drei'
 import { useWorldStore } from '@/store/worldStore'
 import { getTerrainHeight } from './Terrain3D'
 
-const TYPE_SCALE: Record<string, number> = {
-  capital: 18, city: 13, town: 9, village: 6,
-  castle: 12, fortress: 14, tower: 8, ruin: 6,
-  port: 10, dungeon: 8, shrine: 6, camp: 5,
+const TYPE_HEIGHT: Record<string, number> = {
+  capital: 22, city: 16, town: 12, village: 8,
+  castle: 18, fortress: 20, tower: 14, ruin: 8,
+  port: 12, dungeon: 10, shrine: 9, camp: 7,
+}
+const TYPE_RADIUS: Record<string, number> = {
+  capital: 5, city: 3.5, town: 2.5, village: 1.8,
+  castle: 4, fortress: 4.5, tower: 2, ruin: 2,
+  port: 3, dungeon: 2.5, shrine: 2, camp: 1.5,
 }
 
 function SettlementPin({ settlement }: { settlement: any }) {
@@ -16,66 +20,91 @@ function SettlementPin({ settlement }: { settlement: any }) {
   const selectedId = useWorldStore(s => s.selectedEntityId)
   const selectEntity = useWorldStore(s => s.selectEntity)
   const setSidePanel = useWorldStore(s => s.setSidePanel)
-  const meshRef = useRef<THREE.Mesh>(null)
 
-  const faction = world.factions.find(f => f.id === settlement.factionId)
-  const color = faction?.color ?? '#6b6055'
+  const faction = world.factions.find((f: any) => f.id === settlement.factionId)
+  const color = faction?.color ?? '#888888'
+  const secColor = faction?.secondaryColor ?? '#ccaa44'
   const isSelected = selectedId === settlement.id
-  const scale = (TYPE_SCALE[settlement.type] ?? 7) / 10
+  const isCapital = settlement.type === 'capital'
+  const isCastle = settlement.type === 'castle' || settlement.type === 'fortress'
+
   const terrainY = getTerrainHeight(world.terrain, settlement.position.x, settlement.position.y, world.gridWidth, world.gridHeight)
+  const pinH = TYPE_HEIGHT[settlement.type] ?? 10
+  const pinR = TYPE_RADIUS[settlement.type] ?? 2.5
 
-  useFrame(({ clock }) => {
-    if (meshRef.current && isSelected) {
-      meshRef.current.position.y = terrainY + scale * 8 + Math.sin(clock.elapsedTime * 3) * 2
-    }
-  })
+  const handleClick = (e: any) => {
+    e.stopPropagation()
+    selectEntity(settlement.id, 'settlement')
+    setSidePanel('inspect')
+  }
 
-  const height = scale * 16
-  const radius = scale * 4
+  const labelFontSize = isCapital ? '13px' : isCastle ? '11px' : '10px'
+  const labelColor = isCapital ? secColor : '#e8dfc0'
 
   return (
     <group position={[settlement.position.x, terrainY, settlement.position.y]}>
-      {/* Glow ring on ground */}
+      {/* Ground ring */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.5, 0]}>
-        <ringGeometry args={[radius * 1.5, radius * 2, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={isSelected ? 0.5 : 0.2} side={THREE.DoubleSide} />
+        <ringGeometry args={[pinR * 1.4, pinR * 2, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={isSelected ? 0.6 : 0.25} side={THREE.DoubleSide} />
       </mesh>
-      {/* Pin cylinder */}
-      <mesh
-        ref={meshRef}
-        position={[0, height / 2, 0]}
-        castShadow
-        onClick={e => { e.stopPropagation(); selectEntity(settlement.id, 'settlement'); setSidePanel('inspect') }}
+
+      {/* Pin body */}
+      <mesh position={[0, pinH / 2, 0]} onClick={handleClick} castShadow>
+        {isCastle
+          ? <boxGeometry args={[pinR * 1.6, pinH, pinR * 1.6]} />
+          : <cylinderGeometry args={[pinR * 0.65, pinR, pinH, isCapital ? 6 : 8]} />
+        }
+        <meshPhongMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={isSelected ? 0.5 : 0.12}
+          shininess={50}
+        />
+      </mesh>
+
+      {/* Top marker */}
+      <mesh position={[0, pinH + pinR, 0]} onClick={handleClick} castShadow>
+        {isCapital
+          ? <sphereGeometry args={[pinR * 1.6, 12, 12]} />
+          : isCastle
+            ? <coneGeometry args={[pinR * 1.3, pinR * 2.8, 4]} />
+            : <sphereGeometry args={[pinR * 1.1, 8, 8]} />
+        }
+        <meshPhongMaterial
+          color={isCapital ? secColor : color}
+          emissive={isCapital ? secColor : color}
+          emissiveIntensity={isSelected ? 0.6 : 0.2}
+          shininess={80}
+        />
+      </mesh>
+
+      {/* Settlement label */}
+      <Html
+        position={[0, pinH + pinR * 3.5, 0]}
+        center
+        distanceFactor={350}
+        style={{ pointerEvents: 'none', userSelect: 'none' }}
+        zIndexRange={[20, 20]}
       >
-        <cylinderGeometry args={[radius * 0.6, radius, height, 8]} />
-        <meshPhongMaterial color={color} shininess={60} emissive={color} emissiveIntensity={isSelected ? 0.4 : 0.1} />
-      </mesh>
-      {/* Top cap (sphere for capital, cone for castle, flat disc otherwise) */}
-      {settlement.type === 'capital' ? (
-        <mesh position={[0, height + radius * 1.2, 0]} castShadow>
-          <sphereGeometry args={[radius * 1.4, 12, 12]} />
-          <meshPhongMaterial color={faction?.secondaryColor ?? '#e8c97a'} shininess={100} emissive={faction?.secondaryColor ?? '#e8c97a'} emissiveIntensity={0.3} />
-        </mesh>
-      ) : settlement.type === 'castle' || settlement.type === 'fortress' ? (
-        <mesh position={[0, height, 0]} castShadow>
-          <coneGeometry args={[radius * 1.2, radius * 2.5, 4]} />
-          <meshPhongMaterial color={faction?.secondaryColor ?? '#c9a84c'} />
-        </mesh>
-      ) : (
-        <mesh position={[0, height + radius * 0.4, 0]}>
-          <cylinderGeometry args={[radius * 1.1, radius * 1.1, radius * 0.4, 16]} />
-          <meshPhongMaterial color={faction?.secondaryColor ?? '#c9a84c'} />
-        </mesh>
-      )}
+        <div style={{
+          fontFamily: '"Cinzel", serif',
+          fontWeight: isCapital ? 700 : 500,
+          fontSize: labelFontSize,
+          letterSpacing: '0.06em',
+          color: labelColor,
+          textShadow: '0 0 5px rgba(0,0,0,1), 0 0 10px rgba(0,0,0,0.85)',
+          whiteSpace: 'nowrap',
+          textAlign: 'center',
+        }}>
+          {settlement.name}
+        </div>
+      </Html>
     </group>
   )
 }
 
 export default function Settlements3D() {
   const settlements = useWorldStore(s => s.world.settlements)
-  return (
-    <>
-      {settlements.map(s => <SettlementPin key={s.id} settlement={s} />)}
-    </>
-  )
+  return <>{settlements.map((s: any) => <SettlementPin key={s.id} settlement={s} />)}</>
 }

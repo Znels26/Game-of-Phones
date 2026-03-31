@@ -9,11 +9,13 @@ import Water3D from './scene/Water3D'
 import Settlements3D from './scene/Settlements3D'
 import Roads3D from './scene/Roads3D'
 import Rivers3D from './scene/Rivers3D'
+import Regions3D from './scene/Regions3D'
 
 function CameraSetup({ cx, cz }: { cx: number; cz: number }) {
   const { camera } = useThree()
   useEffect(() => {
-    camera.position.set(cx - 80, 320, cz + 380)
+    // Top-down-ish view, like Azgaar's but with depth
+    camera.position.set(cx, 580, cz + 220)
     camera.lookAt(cx, 0, cz)
   }, [camera, cx, cz])
   return null
@@ -97,6 +99,7 @@ export default function WorldCanvas() {
         <Suspense fallback={null}>
           <Terrain3D />
           <Water3D />
+          <Regions3D />
           <Roads3D />
           <Rivers3D />
           <Settlements3D />
@@ -108,8 +111,8 @@ export default function WorldCanvas() {
         </Suspense>
         <OrbitControls
           target={[cx, 0, cz]}
-          maxPolarAngle={Math.PI / 2.1}
-          minPolarAngle={0.15}
+          maxPolarAngle={Math.PI / 2.05}
+          minPolarAngle={0.1}
           minDistance={40}
           maxDistance={1400}
           panSpeed={1.5}

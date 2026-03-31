@@ -9,24 +9,48 @@ function generateTerrain(): TerrainCell[][] {
   for (let r = 0; r < rows; r++) {
     map[r] = []
     for (let c = 0; c < cols; c++) {
-      const nx = c / cols - 0.5, ny = r / rows - 0.5
+      const nx = (c / cols) * 2 - 1   // -1 to 1
+      const ny = (r / rows) * 2 - 1   // -1 to 1
+
+      // Multi-octave continent shape — asymmetric so it looks like a real landmass
       let h = 0
-      h += Math.sin(nx * 7.1 + 1.2) * Math.cos(ny * 5.8) * 2.2
-      h += Math.sin(nx * 14.3 - 0.5) * Math.sin(ny * 11.7 + 2.1) * 1.1
-      h += Math.sin(nx * 27.8 + 3.0) * Math.cos(ny * 21.4 - 1.3) * 0.45
-      h += Math.cos(nx * 4.2 + ny * 5.8) * 1.4
-      const dist = Math.sqrt(nx * nx * 1.1 + ny * ny * 0.9) * 2.0
-      h -= dist * dist * 2.8
-      h = Math.max(0, Math.min(10, (h + 3.2) * 1.1))
+      h += Math.sin(nx * 3.1 + 0.8) * Math.cos(ny * 2.9 + 0.4) * 2.8   // major shape
+      h += Math.sin(nx * 6.2 - 1.1) * Math.sin(ny * 5.7 + 1.9) * 1.4   // medium variation
+      h += Math.cos(nx * 11.4 + 2.2) * Math.cos(ny * 9.8 - 0.7) * 0.7  // detail
+      h += Math.sin(nx * 19.3 - 0.3) * Math.cos(ny * 17.1 + 2.8) * 0.3 // fine detail
+
+      // Irregular island falloff — creates peninsulas and gulfs
+      const baseD = Math.sqrt(nx * nx * 0.9 + ny * ny * 1.1)
+      const warpX = Math.sin(ny * 3.5 + 1.0) * 0.3
+      const warpY = Math.cos(nx * 2.8 - 0.5) * 0.25
+      const warpedD = Math.sqrt((nx + warpX) * (nx + warpX) + (ny + warpY) * (ny + warpY))
+      h -= warpedD * warpedD * 3.2
+
+      // Normalize to 0-10
+      h = Math.max(0, Math.min(10, (h + 3.5) * 1.15))
+
+      // Mountain spine in northwest
+      const mtnFactor = Math.max(0, Math.sin((nx + 0.1) * 5.0 + (ny + 0.2) * 3.0) * 1.8)
+      if (nx < 0.1 && ny < 0.1) h = Math.min(10, h + mtnFactor)
+
       let type: TerrainType
-      if (h < 1.4) type = 'ocean'
-      else if (h < 2.0) type = 'beach'
+      if (h < 1.5) type = 'ocean'
+      else if (h < 2.1) type = 'beach'
       else if (h < 3.8) type = 'plains'
-      else if (h < 5.5) type = 'hills'
-      else if (h < 7.5) type = 'mountains'
+      else if (h < 5.6) type = 'hills'
+      else if (h < 7.8) type = 'mountains'
       else type = 'peaks'
-      if (type === 'plains' && Math.sin(nx * 31.2 + ny * 29.7) > 0.35) type = 'forest'
-      if (type === 'plains' && Math.cos(nx * 23.1 - ny * 18.4) > 0.55) type = 'forest'
+
+      // Forest patches on plains/hills
+      const fNoise = Math.sin(nx * 28.4 + ny * 23.7) * Math.cos(nx * 17.2 - ny * 31.5)
+      if ((type === 'plains' || type === 'hills') && fNoise > 0.38) type = 'forest'
+
+      // Volcanic area top-right
+      if (nx > 0.45 && ny < -0.25 && h > 2.5) type = h > 5 ? 'volcanic' : 'desert'
+
+      // Swamp in low southeast
+      if (nx > 0.1 && ny > 0.25 && h > 1.5 && h < 3.2) type = 'swamp'
+
       map[r].push({ type, elevation: h, moisture: 0.5 })
     }
   }
