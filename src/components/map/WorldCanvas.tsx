@@ -84,7 +84,6 @@ export default function WorldCanvas() {
   const dayNightEnabled = useWorldStore(s => s.world.dayNightEnabled)
   const cx = gridWidth / 2, cz = gridHeight / 2
   const isNight = dayNightEnabled && (tod < 0.2 || tod > 0.8)
-  const sunAngle = (tod - 0.25) * Math.PI * 2
 
   return (
     <div className="w-full h-full bg-[#06090f]">
@@ -104,13 +103,7 @@ export default function WorldCanvas() {
           <ClickToPlane />
           {isNight
             ? <Stars radius={800} depth={80} count={3000} factor={4} fade />
-            : <Sky
-                sunPosition={[Math.cos(sunAngle) * 400, Math.max(0.05, Math.sin(sunAngle)) * 500, -200]}
-                turbidity={8}
-                rayleigh={2}
-                mieCoefficient={0.005}
-                mieDirectionalG={0.8}
-              />
+            : <Sky sunPosition={[100, 80, -200]} turbidity={6} rayleigh={0.5} mieCoefficient={0.005} mieDirectionalG={0.8} />
           }
         </Suspense>
         <OrbitControls

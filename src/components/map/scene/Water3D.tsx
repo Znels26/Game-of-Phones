@@ -18,7 +18,7 @@ export default function Water3D() {
   })
 
   return (
-    <mesh ref={meshRef} position={[gridWidth / 2, SEA_LEVEL, gridHeight / 2]} receiveShadow>
+    <mesh ref={meshRef} position={[gridWidth / 2, SEA_LEVEL, gridHeight / 2]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[gridWidth * 1.4, gridHeight * 1.4]} />
       <meshPhongMaterial
         color="#1a4a8a"
